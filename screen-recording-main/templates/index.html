@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screen Recorder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+          background-image: url("https://assets-global.website-files.com/647049f40d72f61b1a42f2c3/655c10d4d8674f4cbe2a79c0_c77668de-2bd7-4da9-8d16-055c33e30ed7.webp");
+          background-repeat:no-repeat;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px 0;
+            margin-top: 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #3498db;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            outline: none;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .button-container button {
+            width: 30%;
+        }
+
+        @media screen and (max-width: 500px) {
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .button-container button {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Screen Recorder</h1>
+        <div class="button-container">
+            <button id="startBtn">Start Recording</button>
+            <button id="stopBtn" style="display: none;">Stop Recording</button>
+            <button id="releaseBtn" style="display: none;">Release Video</button>
+        </div>
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const releaseBtn = document.getElementById('releaseBtn');
+            const statusDiv = document.getElementById('status');
+
+            startBtn.addEventListener('click', function() {
+                startBtn.disabled = true;
+                stopBtn.style.display = 'block';
+                releaseBtn.style.display = 'none';
+                startRecording();
+            });
+
+            stopBtn.addEventListener('click', function() {
+                startBtn.disabled = false;
+                startBtn.style.display = 'block';
+                stopBtn.style.display = 'none';
+                releaseBtn.style.display = 'block';
+                stopRecording();
+            });
+
+            releaseBtn.addEventListener('click', function() {
+                fetch('/release-video', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to release video.');
+                        }
+                    })
+                    .then(data => {
+                        statusDiv.innerHTML = "File saved successfully!";
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        statusDiv.innerHTML = "An error occurred while saving the file.";
+                    });
+            });
+
+            function startRecording() {
+                fetch('/start-recording', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to start recording.');
+                        }
+                    })
+                    .then(data => {
+                        statusDiv.innerHTML = "Recording started.";
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        statusDiv.innerHTML = "Failed to start recording.";
+                    });
+            }
+
+            function stopRecording() {
+                fetch('/stop-recording', { method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.json();
+                        } else {
+                            throw new Error('Failed to stop recording.');
+                        }
+                    })
+                    .then(data => {
+                        statusDiv.innerHTML = "Recording stopped.";
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        statusDiv.innerHTML = "Failed to stop recording.";
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
